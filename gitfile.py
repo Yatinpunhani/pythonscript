@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 # Quivers API Config
 API_KEY = "586d0e63-1175-40df-82e4-da32c3fedb6e"
 BUSINESS_ID = "M18106_USATN_7DC23AE3"
-Email_count=0
+Email_count = 0
+
 # Email Config
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -33,11 +34,9 @@ def send_email(body):
     except Exception as e:
         print("❌ Failed to send email:", e)
 
-# Start time (UTC)
-last_updated_time = datetime.utcnow() - timedelta(minutes=10)  # Start 5 min in past
-
-while True:
-    # Step 1: Update LastUpdatedOnUtc param
+def check_orders():
+    # Start time (UTC)
+    last_updated_time = datetime.utcnow() - timedelta(minutes=10)  # Start 5 min in past
     last_updated_time += timedelta(minutes=5)
     formatted_time = last_updated_time.isoformat()
 
@@ -64,7 +63,7 @@ while True:
         data = response.json()
     except Exception as e:
         print("❌ Failed to fetch from Quivers Search API:", e)
-        continue
+        return
 
     order_ref_ids_with_status_40 = []
     mappingdict = {}
@@ -109,19 +108,9 @@ while True:
         for order_id in order_ref_ids_with_status_40:
             email_body += f"- {order_id}\n"
         send_email(email_body)
-        print("Non economy orders",email_body)
-        Email_count=Email_count+1
-        print(Email_count)
+        print("Non economy orders", email_body)
     else:
-        if order_ref_ids_with_status_40:
-            email_body = "\n🔍 Orders with Status 40:\n"
-            for order_id in order_ref_ids_with_status_40:
-                email_body += f"- {order_id}\n"
-            # send_email(email_body)
-            # Email_count=Email_count+1
-            # print(Email_count)
-            print("Order with lineitem status 40",order_ref_ids_with_status_40)
         print("✅ No non-economy shipping orders found.")
 
-    print("⏳ Waiting 5 minutes for next check...\n")
-    time.sleep(300)  # Sleep for 5 minutes before next iteration
+if __name__ == "__main__":
+    check_orders()
