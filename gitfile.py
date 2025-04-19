@@ -4,18 +4,17 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-import os
 
 # Quivers API Config
 API_KEY = "586d0e63-1175-40df-82e4-da32c3fedb6e"
 BUSINESS_ID = "M18106_USATN_7DC23AE3"
-
-# Email Config (use environment variables in GitHub Actions)
+Email_count=0
+# Email Config
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASSWORD")
-EMAIL_RECEIVER = os.environ.get("EMAIL_RECEIVER", EMAIL_HOST_USER)
+EMAIL_HOST_USER = "punhani.yatin2002@gmail.com"
+EMAIL_HOST_PASSWORD = "qqwa dhae btpp tlao"  # App Password
+EMAIL_RECEIVER = "punhani.yatin2002@gmail.com"
 
 def send_email(body):
     msg = MIMEMultipart()
@@ -34,10 +33,10 @@ def send_email(body):
     except Exception as e:
         print("❌ Failed to send email:", e)
 
-def check_orders():
-    # Start time (UTC)
-    last_updated_time = datetime.utcnow() - timedelta(minutes=10)
+# Start time (UTC)
+last_updated_time = datetime.utcnow() - timedelta(minutes=10)  # Start 5 min in past
 
+while True:
     # Step 1: Update LastUpdatedOnUtc param
     last_updated_time += timedelta(minutes=5)
     formatted_time = last_updated_time.isoformat()
@@ -65,7 +64,7 @@ def check_orders():
         data = response.json()
     except Exception as e:
         print("❌ Failed to fetch from Quivers Search API:", e)
-        return
+        continue
 
     order_ref_ids_with_status_40 = []
     mappingdict = {}
@@ -110,14 +109,19 @@ def check_orders():
         for order_id in order_ref_ids_with_status_40:
             email_body += f"- {order_id}\n"
         send_email(email_body)
-        print("Non economy orders", email_body)
+        print("Non economy orders",email_body)
+        Email_count=Email_count+1
+        print(Email_count)
     else:
         if order_ref_ids_with_status_40:
             email_body = "\n🔍 Orders with Status 40:\n"
             for order_id in order_ref_ids_with_status_40:
                 email_body += f"- {order_id}\n"
-            print("Order with lineitem status 40", order_ref_ids_with_status_40)
+            # send_email(email_body)
+            # Email_count=Email_count+1
+            # print(Email_count)
+            print("Order with lineitem status 40",order_ref_ids_with_status_40)
         print("✅ No non-economy shipping orders found.")
 
-if __name__ == "__main__":
-    check_orders()
+    print("⏳ Waiting 5 minutes for next check...\n")
+    time.sleep(300)  # Sleep for 5 minutes before next iteration
