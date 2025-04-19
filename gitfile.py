@@ -36,7 +36,7 @@ def send_email(body):
 
 def check_orders():
     # Start time (UTC)
-    last_updated_time = datetime.utcnow() - timedelta(minutes=10)
+    last_updated_time = datetime.utcnow() - timedelta(minutes=15)
 
     # Step 1: Update LastUpdatedOnUtc param
     last_updated_time += timedelta(minutes=5)
